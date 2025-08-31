@@ -1,5 +1,5 @@
 # Lotto analysis Shiny app
-
+setwd("C:/R_project/Codex_fun")
 suppressPackageStartupMessages({
   library(shiny)
   library(httr)

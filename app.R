@@ -1,5 +1,7 @@
 # Lotto analysis Shiny app
-setwd("C:/R_project/Codex_fun")
+if (dir.exists("C:/R_project/Codex_fun")) {
+  setwd("C:/R_project/Codex_fun")
+}
 suppressPackageStartupMessages({
   library(shiny)
   library(httr)
@@ -36,7 +38,12 @@ calculate_frequency <- function(df) {
 
 #' Suggest next draw numbers based on frequency
 suggest_numbers <- function(freq, n = 6) {
-  as.integer(names(freq)[seq_len(n)])
+  sample(
+    as.integer(names(freq)),
+    size = n,
+    replace = FALSE,
+    prob = as.numeric(freq)
+  )
 }
 
 #' Create Shiny application
@@ -62,9 +69,10 @@ lotto_app <- function(data = load_lotto_results()) {
         labs(x = "Number", y = "Frequency")
     })
     observeEvent(input$suggest, {
-      nums <- suggest_numbers(freq)
-      output$suggested <- renderText(paste("Suggested numbers:",
-                                           paste(nums, collapse = ", ")))
+      nums <- sort(suggest_numbers(freq))
+      output$suggested <- renderText(
+        paste("Suggested numbers:", paste(nums, collapse = ", "))
+      )
     })
   }
   shinyApp(ui, server)

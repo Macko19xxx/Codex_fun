@@ -4,7 +4,6 @@ suppressPackageStartupMessages({
   library(shiny)
   library(httr)
   library(jsonlite)
-  library(ggplot2)
 })
 
 #' Load last 50 lotto results
@@ -47,19 +46,17 @@ lotto_app <- function(data = load_lotto_results()) {
     sidebarLayout(
       sidebarPanel(actionButton("suggest", "Suggest numbers")),
       mainPanel(
-        plotOutput("freqPlot"),
+        tableOutput("freqTable"),
         verbatimTextOutput("suggested")
       )
     )
   )
   server <- function(input, output, session) {
-    output$freqPlot <- renderPlot({
-      df <- data.frame(number = as.integer(names(freq)),
-                       count = as.vector(freq))
-      ggplot(df, aes(number, count)) +
-        geom_col(fill = "steelblue") +
-        theme_minimal() +
-        labs(x = "Number", y = "Frequency")
+    output$freqTable <- renderTable({
+      data.frame(
+        Number = as.integer(names(freq)),
+        Frequency = as.integer(freq)
+      )
     })
     observeEvent(input$suggest, {
       nums <- suggest_numbers(freq)

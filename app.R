@@ -53,17 +53,26 @@ lotto_app <- function(data = load_lotto_results()) {
     sidebarLayout(
       sidebarPanel(actionButton("suggest", "Suggest numbers")),
       mainPanel(
-        tableOutput("freqTable"),
+        uiOutput("numberList"),
+        verbatimTextOutput("freqText"),
         verbatimTextOutput("suggested")
       )
     )
   )
   server <- function(input, output, session) {
-    output$freqTable <- renderTable({
-      data.frame(
-        Number = as.integer(names(freq)),
-        Frequency = as.integer(freq)
-      )
+    numbers <- 1:49
+    output$numberList <- renderUI({
+      tagList(lapply(numbers, function(i) {
+        actionLink(paste0("num_", i), label = i, style = "margin:4px;")
+      }))
+    })
+    output$freqText <- renderText("Click a number to see its frequency")
+    lapply(numbers, function(i) {
+      observeEvent(input[[paste0("num_", i)]], {
+        f <- freq[as.character(i)]
+        if (is.na(f)) f <- 0
+        output$freqText <- renderText(paste("Frequency of", i, ":", f))
+      })
     })
     observeEvent(input$suggest, {
       nums <- sort(suggest_numbers(freq))
